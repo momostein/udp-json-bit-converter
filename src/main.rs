@@ -1,6 +1,6 @@
 use std::net::UdpSocket;
 
-mod conversion;
+mod bit_conversion;
 
 fn main() -> std::io::Result<()> {
     let socket = UdpSocket::bind("0.0.0.0:7010")?;
@@ -11,7 +11,7 @@ fn main() -> std::io::Result<()> {
 
         eprintln!("Recv {packet_size} bytes");
 
-        let packet = conversion::unpack_packet(&buf[..packet_size]);
+        let packet = bit_conversion::unpack_packet(&buf[..packet_size]);
         let json_bytes = serde_json::to_vec(&packet)?;
 
         socket.send_to(&json_bytes, "127.0.0.1:7000")?;
