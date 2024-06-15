@@ -17,4 +17,3 @@ fn main() -> std::io::Result<()> {
         socket.send_to(&json_bytes, "127.0.0.1:7000")?;
     }
 }
-

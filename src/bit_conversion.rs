@@ -28,9 +28,12 @@ pub fn guarantee_size(chunk: &[u8]) -> [u8; 3] {
 }
 
 pub fn unpack_packet(packet: &[u8]) -> Vec<Panel> {
-    packet.chunks_exact(3).map(guarantee_size).flat_map(unpack_board).collect()
+    packet
+        .chunks_exact(3)
+        .map(guarantee_size)
+        .flat_map(unpack_board)
+        .collect()
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -38,11 +41,7 @@ mod tests {
 
     #[test]
     fn test_unpack_board() {
-        const BOARD: [u8; 3] = [
-            0b0000_1010,
-            0b1111_0100,
-            0b0011_1110,
-        ];
+        const BOARD: [u8; 3] = [0b0000_1010, 0b1111_0100, 0b0011_1110];
 
         const EXPECTED: [Panel; 2] = [
             [0, 1, 0, 1, 0, 0, 1, 0, 0, 1, 1, 1],
@@ -73,4 +72,3 @@ mod tests {
         assert_eq!(unpack_packet(PACKET), expected);
     }
 }
-
