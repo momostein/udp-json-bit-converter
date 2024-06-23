@@ -37,7 +37,7 @@ impl Connections {
     }
 
     pub fn send_touch_designer_bytes(&self, bytes: &[u8]) -> io::Result<usize> {
-        self.socket.send_to(&bytes, self.touch_designer_addr)
+        self.socket.send_to(bytes, self.touch_designer_addr)
     }
 }
 
