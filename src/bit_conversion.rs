@@ -8,13 +8,22 @@ fn unpack_panel_int(panel: u16) -> Panel {
     from_fn(|i| ((panel >> i) & 1) as u8)
 }
 
-#[inline(never)]
+fn reverse_4_bits(bits: u8) -> u8 {
+    let mut out = 0;
+
+    for i in 0..4 {
+        out |= ((bits >> i) & 0x01) << (3 - i);
+    }
+
+    out
+}
+
 fn unpack_board(chunk: [u8; 3]) -> [Panel; 2] {
     let mut panels_int: [u16; 2] = [0, 0];
 
     for (i, register) in chunk.into_iter().enumerate() {
         let left_bits = register & 0x0F;
-        let right_bits = (register >> 4) & 0x0F;
+        let right_bits = reverse_4_bits((register & 0xF0) >> 4);
 
         panels_int[0] |= (left_bits as u16) << (i * 4);
         panels_int[1] |= (right_bits as u16) << (i * 4);
