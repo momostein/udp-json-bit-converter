@@ -1,36 +1,26 @@
 use std::array::from_fn;
 
-const SENSORS_PER_PANEL: usize = 12;
+const SENSORS_PER_PANEL: usize = 24;
 
 type Panel = [u8; SENSORS_PER_PANEL];
 
-fn unpack_panel_int(panel: u16) -> Panel {
-    from_fn(|i| ((panel >> i) & 1) as u8)
-}
-
-fn unpack_board(chunk: [u8; 3]) -> [Panel; 2] {
-    let mut panels_int: [u16; 2] = [0, 0];
-
-    for (i, register) in chunk.into_iter().enumerate() {
-        let left_bits = register & 0x0F;
-        let right_bits = register.reverse_bits() & 0x0F;
-
-        panels_int[0] |= (left_bits as u16) << (i * 4);
-        panels_int[1] |= (right_bits as u16) << (i * 4);
-    }
-
-    panels_int.map(unpack_panel_int)
-}
-
-pub fn guarantee_size(chunk: &[u8]) -> [u8; 3] {
+fn guarantee_size(chunk: &[u8]) -> [u8; 3] {
     chunk.try_into().unwrap()
+}
+
+fn unpack_panel(panel_registers: [u8; 3]) -> Panel {
+    from_fn(|i| {
+        let register = i / u8::BITS as usize;
+        let bit = i % u8::BITS as usize;
+        (panel_registers[register] & (1 << bit) != 0) as u8
+    })
 }
 
 pub fn unpack_packet(packet: &[u8]) -> Vec<Panel> {
     packet
         .chunks_exact(3)
         .map(guarantee_size)
-        .flat_map(unpack_board)
+        .map(unpack_panel)
         .collect()
 }
 
@@ -39,15 +29,14 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_unpack_board() {
+    fn test_unpack_panel() {
         const BOARD: [u8; 3] = [0b0000_1010, 0b1111_0100, 0b0011_1110];
 
-        const EXPECTED: [Panel; 2] = [
-            [0, 1, 0, 1, 0, 0, 1, 0, 0, 1, 1, 1],
-            [0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 1, 1],
+        const EXPECTED: Panel = [
+            0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 0,
         ];
 
-        assert_eq!(unpack_board(BOARD), EXPECTED);
+        assert_eq!(unpack_panel(BOARD), EXPECTED);
     }
 
     #[test]
@@ -62,10 +51,12 @@ mod tests {
         ];
 
         let expected: Vec<Panel> = vec![
-            [0, 1, 0, 1, 0, 0, 1, 0, 0, 1, 1, 1],
-            [0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 1, 1],
-            [0, 1, 1, 1, 0, 1, 1, 0, 0, 1, 1, 1],
-            [0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1],
+            [
+                0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 0,
+            ],
+            [
+                0, 1, 1, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0,
+            ],
         ];
 
         assert_eq!(unpack_packet(PACKET), expected);
