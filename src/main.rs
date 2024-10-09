@@ -15,10 +15,7 @@ struct Args {
     esp_addr: Option<String>,
 
     #[arg(short, long)]
-    recv_port: Option<u16>,
-
-    #[arg(short, long)]
-    send_port: Option<u16>,
+    converter_port: Option<u16>,
 
     #[arg(short, long, default_value = "127.0.0.1:7000")]
     touch_designer_addr: String,

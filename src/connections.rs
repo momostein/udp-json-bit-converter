@@ -72,7 +72,7 @@ pub fn open_connections(args: &Args) -> io::Result<Connections> {
 
     let socket = UdpSocket::bind(SocketAddrV4::new(
         Ipv4Addr::UNSPECIFIED,
-        args.recv_port.unwrap_or(0),
+        args.converter_port.unwrap_or(0),
     ))?;
 
     socket.set_read_timeout(Some(Duration::from_millis(2000)))?;
