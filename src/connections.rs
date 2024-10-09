@@ -72,13 +72,13 @@ pub fn open_connections(args: &Args) -> io::Result<Connections> {
 
     let socket = UdpSocket::bind(SocketAddrV4::new(
         Ipv4Addr::UNSPECIFIED,
-        args.converter_port.unwrap_or(0),
+        args.recv_port.unwrap_or(0),
     ))?;
 
     socket.set_read_timeout(Some(Duration::from_millis(2000)))?;
     socket.set_broadcast(true)?;
 
-    eprintln!("Socket bound to {}", socket.local_addr().unwrap());
+    eprintln!("Socket bound to {}", socket.local_addr()?);
 
     Ok(Connections {
         esp_addr,
